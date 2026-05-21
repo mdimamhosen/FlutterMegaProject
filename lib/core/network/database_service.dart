@@ -141,7 +141,7 @@ class DatabaseService {
         'name': 'Truffle Garlic Fries',
         'description': 'Crispy fries tossed in pure Italian white truffle oil and sea salt.',
         'price': 12.0,
-        'image_url': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300',
+        'image_url': 'premium_truffle_fries.png',
         'is_available': true,
         'addons': ['Extra Truffle Mayo (+1.50)', 'Parmesan Snow (+2.00)']
       },
@@ -152,7 +152,7 @@ class DatabaseService {
         'name': 'Wagyu Smash Burger',
         'description': 'Double smashed Wagyu patties, aged cheddar, caramelised onions, brioche bun.',
         'price': 22.0,
-        'image_url': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300',
+        'image_url': 'premium_wagyu_steak.png',
         'is_available': true,
         'addons': ['Add Thick-Cut Bacon (+3.00)', 'Gluten-Free Bun (+1.50)', 'Extra Patty (+6.00)']
       },
@@ -163,7 +163,7 @@ class DatabaseService {
         'name': 'Seared Salmon Filet',
         'description': 'Crispy skin salmon, asparagus, lemon-herb butter sauce.',
         'price': 28.0,
-        'image_url': 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300',
+        'image_url': 'premium_chef_kitchen.png',
         'is_available': true,
         'addons': ['Herb Butter Glaze (+1.00)', 'Double Asparagus (+4.00)']
       },
@@ -174,7 +174,7 @@ class DatabaseService {
         'name': 'Molten Lava Cake',
         'description': 'Rich dark chocolate cake with a warm flowing liquid core, vanilla bean gelato.',
         'price': 10.0,
-        'image_url': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300',
+        'image_url': 'premium_chocolate_lava.png',
         'is_available': true,
         'addons': ['Extra Gelato scoop (+2.50)']
       },
@@ -185,7 +185,7 @@ class DatabaseService {
         'name': 'Passionfruit Mojito',
         'description': 'Fresh mint, lime, white rum, premium passionfruit puree, soda splash.',
         'price': 14.0,
-        'image_url': 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=300',
+        'image_url': 'premium_mojito_cocktail.png',
         'is_available': true,
         'addons': ['Virgin (No Alcohol) (-3.00)', 'Extra Mint (+0.50)']
       },
