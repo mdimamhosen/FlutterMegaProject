@@ -18,7 +18,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
   List<Map<String, dynamic>> _allItems = [];
   String? _activeCategoryId;
 
-  // Cart State: List of Map containing { 'item': Map, 'quantity': int, 'selectedAddons': List<String> }
   final List<Map<String, dynamic>> _cart = [];
 
   @override
@@ -44,7 +43,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
 
   void _addToCart(Map<String, dynamic> item, List<String> selectedAddons) {
     setState(() {
-      // For simplicity in the demo, check if matching item+addons exists
       final existingIdx = _cart.indexWhere((x) =>
           x['item']['id'] == item['id'] &&
           _areAddonsEqual(x['selectedAddons'] as List<String>, selectedAddons));
@@ -80,7 +78,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
     double total = 0.0;
     for (var x in _cart) {
       double itemBasePrice = x['item']['price'] as double;
-      // Parse addon prices in simple format: Add Thick-Cut Bacon (+3.00)
       double addonPriceSum = 0.0;
       for (var addon in x['selectedAddons'] as List<String>) {
         final regExp = RegExp(r'\+\$?([0-9.]+)');
@@ -267,7 +264,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
                   onPressed: _cart.isEmpty
                       ? null
                       : () async {
-                          // Format cart items database structure
                           final formattedItems = _cart.map((row) {
                             return {
                               'name': row['item']['name'],
@@ -277,7 +273,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
                             };
                           }).toList();
 
-                          // Call database service to place order!
                           await _db.placeCustomerOrder(
                             tableId: widget.tableId,
                             tableNumber: widget.tableNumber,
@@ -346,7 +341,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
       ),
       body: Column(
         children: [
-          // Banner Image
           Container(
             height: 120,
             width: double.infinity,
@@ -369,7 +363,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
             ),
           ),
 
-          // Categories horizontal bar
           const SizedBox(height: 16),
           SizedBox(
             height: 40,
@@ -395,7 +388,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Food items list
           Expanded(
             child: filteredItems.isEmpty
                 ? const Center(child: Text('No active items in this category.'))

@@ -14,7 +14,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey1 = GlobalKey<FormState>();
   final _formKey2 = GlobalKey<FormState>();
 
-  // Form Fields
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -52,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
-        _currentStep = 0; // Go back to first step on error
+        _currentStep = 0;
       });
     } finally {
       if (mounted) {
@@ -311,23 +310,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   flex: 5,
                   child: formContainer(),
                 ),
-                // Visual Split Screen Panel
                 Expanded(
                   flex: 6,
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Theme.of(context).colorScheme.secondary.withOpacity(0.85),
-                          Theme.of(context).colorScheme.primary.withOpacity(0.85),
+                          Color(0xDD0EA5E9),
+                          Color(0xDD7C3AED),
+                          Color(0xDD10B981),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800'),
+                      image: DecorationImage(
+                        image: NetworkImage('premium_chef_kitchen.png'),
                         fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(Colors.black45, BlendMode.darken),
+                        colorFilter: ColorFilter.mode(Colors.black38, BlendMode.darken),
                       ),
                     ),
                     child: const Padding(

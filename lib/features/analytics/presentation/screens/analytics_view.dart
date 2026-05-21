@@ -83,7 +83,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
           ),
           const SizedBox(height: 24),
 
-          // --- KPI Cards Grid ---
           GridView.count(
             crossAxisCount: isMobile ? 1 : 3,
             crossAxisSpacing: 16,
@@ -120,7 +119,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
           ),
           const SizedBox(height: 24),
 
-          // --- Charts Grid ---
           if (isMobile) ...[
             _buildRevenueChart(data, isDark),
             const SizedBox(height: 24),
@@ -136,7 +134,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
             ),
           const SizedBox(height: 24),
 
-          // --- Branch Performance List ---
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20.0),

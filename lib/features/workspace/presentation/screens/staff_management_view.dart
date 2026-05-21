@@ -13,7 +13,6 @@ class _StaffManagementViewState extends State<StaffManagementView> {
   List<Map<String, dynamic>> _staff = [];
   bool _isLoading = true;
 
-  // New staff fields
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   UserRole _selectedRole = UserRole.waiter;

@@ -20,10 +20,8 @@ class _OrderManagementViewState extends State<OrderManagementView> with SingleTi
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    // Bind to database realtime order stream!
     _db.ordersStream.listen((orders) {
       if (mounted) {
-        // Detect if a new pending order arrived to show notification flash!
         final hadNewPending = _allOrders.length < orders.length &&
             orders.any((o) => o['status'] == 'pending' && !_allOrders.any((x) => x['id'] == o['id']));
 
@@ -42,15 +40,12 @@ class _OrderManagementViewState extends State<OrderManagementView> with SingleTi
       }
     });
 
-    // Populate initial orders
     _loadInitialOrders();
   }
 
   void _loadInitialOrders() async {
-    // DatabaseService initializes with dummy data, we pull it synchronously
-    await _db.getBillingSummary(); // just a trigger
+    await _db.getBillingSummary();
     setState(() {
-      // Pull direct orders from db through stream trigger
       _allOrders = [];
     });
   }
@@ -73,7 +68,6 @@ class _OrderManagementViewState extends State<OrderManagementView> with SingleTi
 
     return Column(
       children: [
-        // --- Realtime Toast Warning Banner on New Order ---
         if (_newOrderAlert)
           Container(
             width: double.infinity,

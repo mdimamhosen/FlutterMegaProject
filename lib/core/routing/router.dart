@@ -13,7 +13,6 @@ final GoRouter appRouter = GoRouter(
     final isLoggedIn = db.currentUser != null;
     final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-    // Allow customers to access customer menus without logging in!
     if (state.matchedLocation.startsWith('/menu/table/')) {
       return null;
     }
@@ -35,7 +34,6 @@ final GoRouter appRouter = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
     ),
-    // Multi-route Dashboard Dashboard
     GoRoute(
       path: '/dashboard/:tab',
       builder: (context, state) {
@@ -43,7 +41,6 @@ final GoRouter appRouter = GoRouter(
         return DashboardScreen(currentTab: tab);
       },
     ),
-    // QR Code Ordering Link: /menu/table/table_id/table_number
     GoRoute(
       path: '/menu/table/:tableId/:tableNumber',
       builder: (context, state) {

@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:uuid/uuid.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum UserRole { owner, manager, cashier, waiter, kitchen }
 
@@ -8,16 +11,25 @@ class DatabaseService {
   factory DatabaseService() => _instance;
   DatabaseService._internal() {
     _initializeMockData();
+    if (isFirebaseAvailable) {
+      _setupFirebaseListeners();
+    }
   }
 
-  // --- Realtime Streams ---
+  bool get isFirebaseAvailable {
+    try {
+      return Firebase.apps.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
   final _orderStreamController = StreamController<List<Map<String, dynamic>>>.broadcast();
   final _tableStreamController = StreamController<List<Map<String, dynamic>>>.broadcast();
 
   Stream<List<Map<String, dynamic>>> get ordersStream => _orderStreamController.stream;
   Stream<List<Map<String, dynamic>>> get tablesStream => _tableStreamController.stream;
 
-  // --- In-Memory Mock Database tables ---
   final List<Map<String, dynamic>> _users = [];
   final List<Map<String, dynamic>> _restaurants = [];
   final List<Map<String, dynamic>> _branches = [];
@@ -29,26 +41,49 @@ class DatabaseService {
   final List<Map<String, dynamic>> _reservations = [];
   final List<Map<String, dynamic>> _billingPlans = [];
 
-  // Active Session State
   Map<String, dynamic>? _currentUser;
   String? _currentRestaurantId;
 
   Map<String, dynamic>? get currentUser => _currentUser;
   String? get currentRestaurantId => _currentRestaurantId;
 
+  void _setupFirebaseListeners() {
+    FirebaseFirestore.instance
+        .collection('orders')
+        .snapshots()
+        .listen((snapshot) {
+      final list = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).where((o) => o['restaurant_id'] == _currentRestaurantId).toList();
+      _orderStreamController.add(list);
+    });
+
+    FirebaseFirestore.instance
+        .collection('tables')
+        .snapshots()
+        .listen((snapshot) {
+      final list = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).where((t) => t['restaurant_id'] == _currentRestaurantId).toList();
+      _tableStreamController.add(list);
+    });
+  }
+
   void _initializeMockData() {
     final uuid = const Uuid();
     final restId = 'restaurant-mega-1';
     _currentRestaurantId = restId;
 
-    // 1. Initial Billing Plans
     _billingPlans.addAll([
       {'id': 'plan-basic', 'name': 'Basic Plan', 'price': 29.0, 'limit_orders': 150, 'limit_staff': 3, 'limit_branches': 1},
       {'id': 'plan-pro', 'name': 'Pro Plan', 'price': 79.0, 'limit_orders': 1000, 'limit_staff': 15, 'limit_branches': 5},
       {'id': 'plan-enterprise', 'name': 'Enterprise Plan', 'price': 199.0, 'limit_orders': 999999, 'limit_staff': 99, 'limit_branches': 99},
     ]);
 
-    // 2. Initial Restaurant
     _restaurants.add({
       'id': restId,
       'name': 'La Parisienne Bistro',
@@ -59,13 +94,11 @@ class DatabaseService {
       'created_at': DateTime.now().toIso8601String(),
     });
 
-    // 3. Branches
     _branches.addAll([
       {'id': 'branch-1', 'restaurant_id': restId, 'name': 'Downtown (Main)', 'address': '120 Broadway St, NY'},
       {'id': 'branch-2', 'restaurant_id': restId, 'name': 'Uptown Express', 'address': '250 Park Ave, NY'},
     ]);
 
-    // 4. Owner & Staff Users
     _currentUser = {
       'id': 'user-owner-1',
       'restaurant_id': restId,
@@ -81,7 +114,6 @@ class DatabaseService {
       {'id': 'user-kitchen-1', 'restaurant_id': restId, 'name': 'Chef Jacques', 'email': 'jacques@mega.com', 'role': UserRole.kitchen.name},
     ]);
 
-    // Populate Staff directory
     for (var u in _users) {
       _staff.add({
         'id': uuid.v4(),
@@ -94,7 +126,6 @@ class DatabaseService {
       });
     }
 
-    // 5. Menu Categories
     _menuCategories.addAll([
       {'id': 'cat-starters', 'restaurant_id': restId, 'name': 'Starters', 'sort_order': 0},
       {'id': 'cat-mains', 'restaurant_id': restId, 'name': 'Main Courses', 'sort_order': 1},
@@ -102,7 +133,6 @@ class DatabaseService {
       {'id': 'cat-drinks', 'restaurant_id': restId, 'name': 'Drinks', 'sort_order': 3},
     ]);
 
-    // 6. Menu Items
     _menuItems.addAll([
       {
         'id': 'item-starter-1',
@@ -161,7 +191,6 @@ class DatabaseService {
       },
     ]);
 
-    // 7. Restaurant Tables
     _tables.addAll([
       {'id': 'table-1', 'restaurant_id': restId, 'branch_id': 'branch-1', 'number': 'T-01', 'capacity': 2, 'status': 'available', 'waiter_id': 'user-waiter-1'},
       {'id': 'table-2', 'restaurant_id': restId, 'branch_id': 'branch-1', 'number': 'T-02', 'capacity': 4, 'status': 'occupied', 'waiter_id': 'user-waiter-1'},
@@ -170,7 +199,6 @@ class DatabaseService {
       {'id': 'table-5', 'restaurant_id': restId, 'branch_id': 'branch-2', 'number': 'T-05', 'capacity': 2, 'status': 'available', 'waiter_id': null},
     ]);
 
-    // 8. Orders (Initial)
     _orders.addAll([
       {
         'id': 'order-1',
@@ -202,7 +230,6 @@ class DatabaseService {
       }
     ]);
 
-    // 9. Reservations
     _reservations.addAll([
       {
         'id': 'res-1',
@@ -228,7 +255,6 @@ class DatabaseService {
       }
     ]);
 
-    // Publish initial lists to streams
     _triggerOrderUpdate();
     _triggerTableUpdate();
   }
@@ -243,9 +269,27 @@ class DatabaseService {
     _tableStreamController.add(List.from(filtered));
   }
 
-  // --- API Authentication CRUD ---
   Future<Map<String, dynamic>?> login(String email, String password) async {
-    await Future.delayed(const Duration(milliseconds: 600)); // Simulate roundtrip
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (isFirebaseAvailable) {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(credential.user?.uid)
+          .get();
+      if (userDoc.exists) {
+        _currentUser = userDoc.data();
+        _currentUser!['id'] = userDoc.id;
+        _currentRestaurantId = _currentUser!['restaurant_id'];
+        _setupFirebaseListeners();
+        return _currentUser;
+      }
+      throw Exception('User profile not found.');
+    }
+
     final found = _users.firstWhere(
       (u) => u['email'].toString().toLowerCase() == email.trim().toLowerCase(),
       orElse: () => {},
@@ -269,6 +313,80 @@ class DatabaseService {
     required String restaurantName,
   }) async {
     await Future.delayed(const Duration(milliseconds: 800));
+    if (isFirebaseAvailable) {
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      final uid = credential.user!.uid;
+      final restId = 'restaurant-$uid';
+      _currentRestaurantId = restId;
+
+      final newRestaurant = {
+        'name': restaurantName,
+        'logo_url': '',
+        'subscription_id': 'plan-basic',
+        'subscription_status': 'trialing',
+        'trial_ends_at': DateTime.now().add(const Duration(days: 14)).toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
+      };
+      await FirebaseFirestore.instance.collection('restaurants').doc(restId).set(newRestaurant);
+
+      final newBranch = {
+        'restaurant_id': restId,
+        'name': 'Main Branch',
+        'address': 'Set restaurant address in settings',
+      };
+      await FirebaseFirestore.instance.collection('branches').add(newBranch);
+
+      _currentUser = {
+        'restaurant_id': restId,
+        'name': name,
+        'email': email,
+        'role': UserRole.owner.name,
+      };
+      await FirebaseFirestore.instance.collection('users').doc(uid).set(_currentUser!);
+      _currentUser!['id'] = uid;
+
+      final newStaff = {
+        'restaurant_id': restId,
+        'user_id': uid,
+        'name': name,
+        'email': email,
+        'role': UserRole.owner.name,
+        'joined_at': DateTime.now().toIso8601String(),
+      };
+      await FirebaseFirestore.instance.collection('staff').add(newStaff);
+
+      final catAppetizers = {
+        'restaurant_id': restId,
+        'name': 'Appetizers',
+        'sort_order': 0,
+      };
+      final catEntrees = {
+        'restaurant_id': restId,
+        'name': 'Entrées',
+        'sort_order': 1,
+      };
+      await FirebaseFirestore.instance.collection('menuCategories').add(catAppetizers);
+      await FirebaseFirestore.instance.collection('menuCategories').add(catEntrees);
+
+      for (int i = 1; i <= 4; i++) {
+        final newTable = {
+          'restaurant_id': restId,
+          'branch_id': 'branch-main',
+          'number': 'T-0$i',
+          'capacity': 4,
+          'status': 'available',
+          'waiter_id': null,
+        };
+        await FirebaseFirestore.instance.collection('tables').add(newTable);
+      }
+
+      _setupFirebaseListeners();
+      return _currentUser!;
+    }
+
     final existing = _users.any((u) => u['email'] == email);
     if (existing) {
       throw Exception('A user with this email already exists.');
@@ -278,7 +396,6 @@ class DatabaseService {
     final restId = 'restaurant-${uuid.v4()}';
     _currentRestaurantId = restId;
 
-    // Create Restaurant
     final newRestaurant = {
       'id': restId,
       'name': restaurantName,
@@ -290,7 +407,6 @@ class DatabaseService {
     };
     _restaurants.add(newRestaurant);
 
-    // Create Primary Branch
     _branches.add({
       'id': 'branch-${uuid.v4()}',
       'restaurant_id': restId,
@@ -298,7 +414,6 @@ class DatabaseService {
       'address': 'Set restaurant address in settings',
     });
 
-    // Create User
     _currentUser = {
       'id': 'user-${uuid.v4()}',
       'restaurant_id': restId,
@@ -308,7 +423,6 @@ class DatabaseService {
     };
     _users.add(_currentUser!);
 
-    // Add Staff Row
     _staff.add({
       'id': uuid.v4(),
       'restaurant_id': restId,
@@ -319,7 +433,6 @@ class DatabaseService {
       'joined_at': DateTime.now().toIso8601String(),
     });
 
-    // Seed default categories and tables for a fast trial experience
     _menuCategories.addAll([
       {'id': 'cat-star-${uuid.v4()}', 'restaurant_id': restId, 'name': 'Appetizers', 'sort_order': 0},
       {'id': 'cat-main-${uuid.v4()}', 'restaurant_id': restId, 'name': 'Entrées', 'sort_order': 1},
@@ -343,18 +456,35 @@ class DatabaseService {
   }
 
   Future<void> logout() async {
+    if (isFirebaseAvailable) {
+      await FirebaseAuth.instance.signOut();
+    }
     _currentUser = null;
     _currentRestaurantId = null;
   }
 
-  // --- Restaurant Workspace CRUD ---
   Future<Map<String, dynamic>> getRestaurantProfile() async {
     if (_currentRestaurantId == null) throw Exception('No active session.');
+    if (isFirebaseAvailable) {
+      final doc = await FirebaseFirestore.instance.collection('restaurants').doc(_currentRestaurantId).get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        data['id'] = doc.id;
+        return data;
+      }
+    }
     return _restaurants.firstWhere((r) => r['id'] == _currentRestaurantId);
   }
 
   Future<void> updateRestaurantProfile(String name, String logoUrl) async {
     if (_currentRestaurantId == null) throw Exception('No active session.');
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('restaurants').doc(_currentRestaurantId).update({
+        'name': name,
+        'logo_url': logoUrl,
+      });
+      return;
+    }
     final idx = _restaurants.indexWhere((r) => r['id'] == _currentRestaurantId);
     if (idx != -1) {
       _restaurants[idx]['name'] = name;
@@ -362,12 +492,30 @@ class DatabaseService {
     }
   }
 
-  // --- Branch Operations ---
   Future<List<Map<String, dynamic>>> getBranches() async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('branches')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    }
     return _branches.where((b) => b['restaurant_id'] == _currentRestaurantId).toList();
   }
 
   Future<void> createBranch(String name, String address) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('branches').add({
+        'restaurant_id': _currentRestaurantId,
+        'name': name,
+        'address': address,
+      });
+      return;
+    }
     final uuid = const Uuid();
     _branches.add({
       'id': 'branch-${uuid.v4()}',
@@ -377,12 +525,33 @@ class DatabaseService {
     });
   }
 
-  // --- Staff Operations ---
   Future<List<Map<String, dynamic>>> getStaffList() async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('staff')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    }
     return _staff.where((s) => s['restaurant_id'] == _currentRestaurantId).toList();
   }
 
   Future<void> inviteStaff(String name, String email, UserRole role) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('staff').add({
+        'restaurant_id': _currentRestaurantId,
+        'user_id': 'user-invited-${Uuid().v4()}',
+        'name': name,
+        'email': email,
+        'role': role.name,
+        'joined_at': DateTime.now().toIso8601String(),
+      });
+      return;
+    }
     final uuid = const Uuid();
     _staff.add({
       'id': uuid.v4(),
@@ -395,14 +564,39 @@ class DatabaseService {
     });
   }
 
-  // --- Menu Operations ---
   Future<List<Map<String, dynamic>>> getCategories() async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('menuCategories')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      final list = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+      list.sort((a, b) => (a['sort_order'] as int).compareTo(b['sort_order'] as int));
+      return list;
+    }
     final list = _menuCategories.where((c) => c['restaurant_id'] == _currentRestaurantId).toList();
     list.sort((a, b) => (a['sort_order'] as int).compareTo(b['sort_order'] as int));
     return list;
   }
 
   Future<void> createCategory(String name) async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('menuCategories')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      final currentCount = snapshot.docs.length;
+      await FirebaseFirestore.instance.collection('menuCategories').add({
+        'restaurant_id': _currentRestaurantId,
+        'name': name,
+        'sort_order': currentCount,
+      });
+      return;
+    }
     final uuid = const Uuid();
     final currentCount = _menuCategories.where((c) => c['restaurant_id'] == _currentRestaurantId).length;
     _menuCategories.add({
@@ -414,10 +608,33 @@ class DatabaseService {
   }
 
   Future<List<Map<String, dynamic>>> getMenuItems(String categoryId) async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('menuItems')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .where('category_id', isEqualTo: categoryId)
+          .get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    }
     return _menuItems.where((i) => i['restaurant_id'] == _currentRestaurantId && i['category_id'] == categoryId).toList();
   }
 
   Future<List<Map<String, dynamic>>> getAllMenuItems() async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('menuItems')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    }
     return _menuItems.where((i) => i['restaurant_id'] == _currentRestaurantId).toList();
   }
 
@@ -429,6 +646,19 @@ class DatabaseService {
     required String imageUrl,
     required List<String> addons,
   }) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('menuItems').add({
+        'restaurant_id': _currentRestaurantId,
+        'category_id': categoryId,
+        'name': name,
+        'description': description,
+        'price': price,
+        'image_url': imageUrl.isEmpty ? 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=300' : imageUrl,
+        'is_available': true,
+        'addons': addons,
+      });
+      return;
+    }
     final uuid = const Uuid();
     _menuItems.add({
       'id': 'item-${uuid.v4()}',
@@ -444,18 +674,40 @@ class DatabaseService {
   }
 
   Future<void> toggleItemAvailability(String itemId, bool isAvailable) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('menuItems').doc(itemId).update({
+        'is_available': isAvailable,
+      });
+      return;
+    }
     final idx = _menuItems.indexWhere((i) => i['id'] == itemId);
     if (idx != -1) {
       _menuItems[idx]['is_available'] = isAvailable;
     }
   }
 
-  // --- Table Operations ---
   Future<List<Map<String, dynamic>>> getTables() async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('tables')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    }
     return _tables.where((t) => t['restaurant_id'] == _currentRestaurantId).toList();
   }
 
   Future<void> updateTableStatus(String tableId, String status) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('tables').doc(tableId).update({
+        'status': status,
+      });
+      return;
+    }
     final idx = _tables.indexWhere((t) => t['id'] == tableId);
     if (idx != -1) {
       _tables[idx]['status'] = status;
@@ -464,6 +716,12 @@ class DatabaseService {
   }
 
   Future<void> assignWaiter(String tableId, String? waiterId) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('tables').doc(tableId).update({
+        'waiter_id': waiterId,
+      });
+      return;
+    }
     final idx = _tables.indexWhere((t) => t['id'] == tableId);
     if (idx != -1) {
       _tables[idx]['waiter_id'] = waiterId;
@@ -471,18 +729,34 @@ class DatabaseService {
     }
   }
 
-  // --- Realtime Order Flow ---
   Future<void> placeCustomerOrder({
     required String tableId,
     required String tableNumber,
     required List<Map<String, dynamic>> items,
   }) async {
-    final uuid = const Uuid();
     double total = 0.0;
     for (var item in items) {
-      total += (item['price'] as double) * (item['quantity'] as int);
+      total += (item['price'] as num).toDouble() * (item['quantity'] as int);
     }
 
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('orders').add({
+        'restaurant_id': _currentRestaurantId,
+        'table_id': tableId,
+        'table_number': tableNumber,
+        'items': items,
+        'total': total,
+        'status': 'pending',
+        'created_at': DateTime.now().toIso8601String(),
+        'estimated_minutes': 15,
+      });
+      await FirebaseFirestore.instance.collection('tables').doc(tableId).update({
+        'status': 'occupied',
+      });
+      return;
+    }
+
+    final uuid = const Uuid();
     final newOrder = {
       'id': 'order-${uuid.v4().substring(0, 8)}',
       'restaurant_id': _currentRestaurantId,
@@ -497,7 +771,6 @@ class DatabaseService {
 
     _orders.add(newOrder);
 
-    // Automatically set table to occupied
     final tIdx = _tables.indexWhere((t) => t['id'] == tableId);
     if (tIdx != -1) {
       _tables[tIdx]['status'] = 'occupied';
@@ -508,11 +781,26 @@ class DatabaseService {
   }
 
   Future<void> updateOrderStatus(String orderId, String status) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
+        'status': status,
+      });
+      if (status == 'completed' || status == 'served') {
+        final orderDoc = await FirebaseFirestore.instance.collection('orders').doc(orderId).get();
+        if (orderDoc.exists) {
+          final tableId = orderDoc.data()!['table_id'];
+          await FirebaseFirestore.instance.collection('tables').doc(tableId).update({
+            'status': 'available',
+          });
+        }
+      }
+      return;
+    }
+
     final idx = _orders.indexWhere((o) => o['id'] == orderId);
     if (idx != -1) {
       _orders[idx]['status'] = status;
 
-      // If marked completed or cancelled, optionally release table
       if (status == 'completed' || status == 'served') {
         final tableId = _orders[idx]['table_id'];
         final tIdx = _tables.indexWhere((t) => t['id'] == tableId);
@@ -526,8 +814,18 @@ class DatabaseService {
     }
   }
 
-  // --- Reservations ---
   Future<List<Map<String, dynamic>>> getReservations() async {
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('reservations')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    }
     return _reservations.where((r) => r['restaurant_id'] == _currentRestaurantId).toList();
   }
 
@@ -539,6 +837,19 @@ class DatabaseService {
     required String time,
     required String notes,
   }) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('reservations').add({
+        'restaurant_id': _currentRestaurantId,
+        'customer_name': customerName,
+        'customer_phone': customerPhone,
+        'guests': guests,
+        'date': date,
+        'time': time,
+        'status': 'pending',
+        'notes': notes,
+      });
+      return;
+    }
     final uuid = const Uuid();
     _reservations.add({
       'id': 'res-${uuid.v4()}',
@@ -554,24 +865,58 @@ class DatabaseService {
   }
 
   Future<void> updateReservationStatus(String reservationId, String status) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('reservations').doc(reservationId).update({
+        'status': status,
+      });
+      return;
+    }
     final idx = _reservations.indexWhere((r) => r['id'] == reservationId);
     if (idx != -1) {
       _reservations[idx]['status'] = status;
     }
   }
 
-  // --- Billing & Analytics ---
   Future<Map<String, dynamic>> getBillingSummary() async {
     final restaurant = await getRestaurantProfile();
     final planId = restaurant['subscription_id'];
     final plan = _billingPlans.firstWhere((p) => p['id'] == planId);
 
-    // Calculate usage
-    final currentMonthStart = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
-    final ordersCount = _orders.where((o) {
-      final dt = DateTime.parse(o['created_at']);
-      return o['restaurant_id'] == _currentRestaurantId && dt.isAfter(currentMonthStart);
-    }).length;
+    int ordersCount = 0;
+    int staffCount = 0;
+    int branchesCount = 0;
+
+    if (isFirebaseAvailable) {
+      final currentMonthStart = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+      final ordersSnapshot = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      ordersCount = ordersSnapshot.docs.where((doc) {
+        final dt = DateTime.parse(doc.data()['created_at']);
+        return dt.isAfter(currentMonthStart);
+      }).length;
+
+      final staffSnapshot = await FirebaseFirestore.instance
+          .collection('staff')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      staffCount = staffSnapshot.docs.length;
+
+      final branchesSnapshot = await FirebaseFirestore.instance
+          .collection('branches')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      branchesCount = branchesSnapshot.docs.length;
+    } else {
+      final currentMonthStart = DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+      ordersCount = _orders.where((o) {
+        final dt = DateTime.parse(o['created_at']);
+        return o['restaurant_id'] == _currentRestaurantId && dt.isAfter(currentMonthStart);
+      }).length;
+      staffCount = _staff.where((s) => s['restaurant_id'] == _currentRestaurantId).length;
+      branchesCount = _branches.where((b) => b['restaurant_id'] == _currentRestaurantId).length;
+    }
 
     return {
       'plan_name': plan['name'],
@@ -580,14 +925,21 @@ class DatabaseService {
       'limit_staff': plan['limit_staff'],
       'limit_branches': plan['limit_branches'],
       'current_month_orders': ordersCount,
-      'current_staff_count': _staff.where((s) => s['restaurant_id'] == _currentRestaurantId).length,
-      'current_branches_count': _branches.where((b) => b['restaurant_id'] == _currentRestaurantId).length,
+      'current_staff_count': staffCount,
+      'current_branches_count': branchesCount,
       'subscription_status': restaurant['subscription_status'],
       'trial_ends_at': restaurant['trial_ends_at'],
     };
   }
 
   Future<void> upgradePlan(String planId) async {
+    if (isFirebaseAvailable) {
+      await FirebaseFirestore.instance.collection('restaurants').doc(_currentRestaurantId).update({
+        'subscription_id': planId,
+        'subscription_status': 'active',
+      });
+      return;
+    }
     final idx = _restaurants.indexWhere((r) => r['id'] == _currentRestaurantId);
     if (idx != -1) {
       _restaurants[idx]['subscription_id'] = planId;
@@ -596,16 +948,30 @@ class DatabaseService {
   }
 
   Future<Map<String, dynamic>> getAnalyticsData() async {
-    final restaurantOrders = _orders.where((o) => o['restaurant_id'] == _currentRestaurantId && o['status'] != 'cancelled').toList();
+    List<Map<String, dynamic>> restaurantOrders = [];
+    if (isFirebaseAvailable) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('restaurant_id', isEqualTo: _currentRestaurantId)
+          .get();
+      restaurantOrders = snapshot.docs
+          .map((doc) => doc.data())
+          .where((o) => o['status'] != 'cancelled')
+          .toList();
+    } else {
+      restaurantOrders = _orders
+          .where((o) => o['restaurant_id'] == _currentRestaurantId && o['status'] != 'cancelled')
+          .toList();
+    }
 
     double totalRevenue = 0.0;
     Map<String, double> topFoods = {};
     Map<int, double> hourlyOrders = {};
 
     for (var o in restaurantOrders) {
-      totalRevenue += o['total'] as double;
+      totalRevenue += (o['total'] as num).toDouble();
       final dt = DateTime.parse(o['created_at']);
-      hourlyOrders[dt.hour] = (hourlyOrders[dt.hour] ?? 0.0) + (o['total'] as double);
+      hourlyOrders[dt.hour] = (hourlyOrders[dt.hour] ?? 0.0) + (o['total'] as num).toDouble();
 
       final itemsList = o['items'] as List;
       for (var item in itemsList) {

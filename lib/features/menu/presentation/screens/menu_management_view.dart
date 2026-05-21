@@ -15,15 +15,13 @@ class _MenuManagementViewState extends State<MenuManagementView> {
   List<Map<String, dynamic>> _items = [];
   String? _selectedCategoryId;
 
-  // New Category controllers
   final _catNameController = TextEditingController();
 
-  // New Item controllers
   final _itemNameController = TextEditingController();
   final _itemDescController = TextEditingController();
   final _itemPriceController = TextEditingController();
   final _itemImageController = TextEditingController();
-  final _itemAddonsController = TextEditingController(); // Comma-separated list
+  final _itemAddonsController = TextEditingController();
 
   @override
   void initState() {
@@ -214,7 +212,6 @@ class _MenuManagementViewState extends State<MenuManagementView> {
             ),
             const SizedBox(height: 24),
 
-            // --- Categories Tabs row ---
             if (_categories.isEmpty)
               Container(
                 padding: const EdgeInsets.all(24),
@@ -248,7 +245,6 @@ class _MenuManagementViewState extends State<MenuManagementView> {
               ),
               const SizedBox(height: 24),
 
-              // --- Food items list / Action bar ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

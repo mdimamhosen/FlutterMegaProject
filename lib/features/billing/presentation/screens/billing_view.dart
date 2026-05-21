@@ -84,7 +84,6 @@ class _BillingViewState extends State<BillingView> {
             ),
             const SizedBox(height: 24),
 
-            // --- Usage Limits Panel ---
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -151,7 +150,6 @@ class _BillingViewState extends State<BillingView> {
             ),
             const SizedBox(height: 32),
 
-            // --- Stripe Plan Tiers ---
             const Text(
               'Available Plans',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, fontFamily: 'Outfit'),

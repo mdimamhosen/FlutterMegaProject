@@ -65,7 +65,6 @@ class DashboardScreen extends ConsumerWidget {
           color: isDark ? const Color(0xFF111827) : Colors.white,
           child: Column(
             children: [
-              // Sidebar Header Logo
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
                 child: Row(
@@ -101,8 +100,6 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
               const Divider(height: 1),
-
-              // Navigation Links List
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -129,8 +126,6 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
               const Divider(height: 1),
-
-              // Sidebar Profile Footer & Sign Out
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -215,7 +210,6 @@ class DashboardScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          // Realtime Connection Pulse indicator
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -235,8 +229,6 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
-
-          // Theme Switcher Button
           IconButton(
             icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
             onPressed: () {

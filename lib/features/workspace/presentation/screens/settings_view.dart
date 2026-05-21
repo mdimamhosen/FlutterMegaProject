@@ -14,7 +14,6 @@ class _SettingsViewState extends State<SettingsView> {
   Map<String, dynamic>? _profile;
   List<Map<String, dynamic>> _branches = [];
 
-  // Controllers
   final _nameController = TextEditingController();
   final _logoController = TextEditingController();
   final _branchNameController = TextEditingController();

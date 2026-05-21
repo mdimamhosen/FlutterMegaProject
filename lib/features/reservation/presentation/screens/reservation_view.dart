@@ -13,7 +13,6 @@ class _ReservationViewState extends State<ReservationView> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _reservations = [];
 
-  // Controllers for booking creation dialog
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _guestsController = TextEditingController();
@@ -156,7 +155,6 @@ class _ReservationViewState extends State<ReservationView> {
                   ),
                   const SizedBox(height: 24),
 
-                  // --- Reservations List ---
                   if (_reservations.isEmpty)
                     Container(
                       height: 200,

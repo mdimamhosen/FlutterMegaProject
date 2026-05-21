@@ -2,29 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // Light Palette
-  static const Color primaryLight = Color(0xFF059669); // Emerald-600
-  static const Color secondaryLight = Color(0xFF0284C7); // Sky-600
-  static const Color bgLight = Color(0xFFF8FAFC); // Slate-50
+  static const Color primaryLight = Color(0xFF059669);
+  static const Color secondaryLight = Color(0xFF0284C7);
+  static const Color bgLight = Color(0xFFF8FAFC);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color textPrimaryLight = Color(0xFF0F172A); // Slate-900
-  static const Color textSecondaryLight = Color(0xFF475569); // Slate-600
-  static const Color textMutedLight = Color(0xFF94A3B8); // Slate-400
-  static const Color borderLight = Color(0xFFE2E8F0); // Slate-200
+  static const Color textPrimaryLight = Color(0xFF0F172A);
+  static const Color textSecondaryLight = Color(0xFF475569);
+  static const Color textMutedLight = Color(0xFF94A3B8);
+  static const Color borderLight = Color(0xFFE2E8F0);
 
-  // Dark Palette
-  static const Color primaryDark = Color(0xFF10B981); // Emerald-500
-  static const Color secondaryDark = Color(0xFF38BDF8); // Sky-400
-  static const Color bgDark = Color(0xFF090D16); // Ultra deep slate-950
-  static const Color surfaceDark = Color(0xFF111827); // Slate-900
-  static const Color cardDark = Color(0xFF1E293B); // Slate-800
-  static const Color textPrimaryDark = Color(0xFFF8FAFC); // Slate-50
-  static const Color textSecondaryDark = Color(0xFFCBD5E1); // Slate-300
-  static const Color textMutedDark = Color(0xFF64748B); // Slate-500
-  static const Color borderDark = Color(0xFF334155); // Slate-700
+  static const Color primaryDark = Color(0xFF10B981);
+  static const Color secondaryDark = Color(0xFF38BDF8);
+  static const Color bgDark = Color(0xFF090D16);
+  static const Color surfaceDark = Color(0xFF111827);
+  static const Color cardDark = Color(0xFF1E293B);
+  static const Color textPrimaryDark = Color(0xFFF8FAFC);
+  static const Color textSecondaryDark = Color(0xFFCBD5E1);
+  static const Color textMutedDark = Color(0xFF64748B);
+  static const Color borderDark = Color(0xFF334155);
 
-  // Status Colors (Universal)
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);

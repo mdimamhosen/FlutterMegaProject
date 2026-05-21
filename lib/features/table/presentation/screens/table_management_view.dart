@@ -34,8 +34,6 @@ class _TableManagementViewState extends State<TableManagementView> {
   }
 
   void _showQrCodeModal(Map<String, dynamic> table) {
-    // Construct the QR code content. Pointing to standard web route.
-    // e.g. https://mega.example.com/menu/table/table-id/table-number
     final qrContent = 'https://mega-restaurant-saas.web.app/menu/table/${table['id']}/${table['number']}';
 
     showDialog(
@@ -56,7 +54,6 @@ class _TableManagementViewState extends State<TableManagementView> {
               ),
               const Divider(),
               const SizedBox(height: 16),
-              // Premium Print Card Design
               Container(
                 width: 260,
                 padding: const EdgeInsets.all(20),
@@ -169,8 +166,6 @@ class _TableManagementViewState extends State<TableManagementView> {
                     ],
                   ),
                   const SizedBox(height: 24),
-
-                  // --- Table Grid ---
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -198,7 +193,6 @@ class _TableManagementViewState extends State<TableManagementView> {
                         statusIcon = Icons.bookmark_border_rounded;
                       }
 
-                      // Find waiter name
                       final waiterId = table['waiter_id'];
                       final assignedWaiter = _staff.firstWhere((s) => s['user_id'] == waiterId, orElse: () => {});
                       final waiterName = assignedWaiter.isNotEmpty ? assignedWaiter['name'] : 'Unassigned';
@@ -270,7 +264,6 @@ class _TableManagementViewState extends State<TableManagementView> {
                               const Divider(height: 18),
                               Row(
                                 children: [
-                                  // Change Status Quick Button
                                   GestureDetector(
                                     onTap: () async {
                                       final nextStatus = status == 'available'

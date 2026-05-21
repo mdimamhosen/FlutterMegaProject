@@ -185,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  // --- Premium Quick Login Drawer/Panel ---
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -240,23 +239,23 @@ class _LoginScreenState extends State<LoginScreen> {
           ? formWidget()
           : Row(
               children: [
-                // Visual split-screen panel
                 Expanded(
                   flex: 6,
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Theme.of(context).colorScheme.primary.withOpacity(0.85),
-                          Theme.of(context).colorScheme.secondary.withOpacity(0.85),
+                          Color(0xDD4F46E5),
+                          Color(0xDD7C3AED),
+                          Color(0xDDEC4899),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800'),
+                      image: DecorationImage(
+                        image: NetworkImage('premium_restaurant_interior.png'),
                         fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(Colors.black45, BlendMode.darken),
+                        colorFilter: ColorFilter.mode(Colors.black38, BlendMode.darken),
                       ),
                     ),
                     child: Padding(
@@ -304,7 +303,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                // Form Container
                 Expanded(
                   flex: 5,
                   child: formWidget(),
