@@ -168,7 +168,6 @@ class _CustomerMenuScreenState extends State<CustomerMenuScreen> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
           final double total = _calculateTotal();
 
           return Container(

@@ -11,7 +11,6 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   final _db = DatabaseService();
   bool _isLoading = true;
-  Map<String, dynamic>? _profile;
   List<Map<String, dynamic>> _branches = [];
 
   final _nameController = TextEditingController();
@@ -30,7 +29,6 @@ class _SettingsViewState extends State<SettingsView> {
     final b = await _db.getBranches();
     if (mounted) {
       setState(() {
-        _profile = p;
         _branches = b;
         _nameController.text = p['name'];
         _logoController.text = p['logo_url'];

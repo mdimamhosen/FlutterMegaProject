@@ -79,7 +79,7 @@ class PublicHomeScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: isMobile ? 36 : 64,
-                        fontWeight: FontWeight.black,
+                        fontWeight: FontWeight.w900,
                         fontFamily: 'Outfit',
                         height: 1.15,
                         color: isDark ? Colors.white : const Color(0xFF0F172A),
@@ -114,7 +114,7 @@ class PublicHomeScreen extends StatelessWidget {
                               BoxShadow(
                                 color: const Color(0xFF8B5CF6).withOpacity(0.3),
                                 blurRadius: 20,
-                                offset: const Alignment(0, 10).toOffset(),
+                                offset: const Offset(0, 10),
                               )
                             ],
                           ),
@@ -426,7 +426,7 @@ class PublicHomeScreen extends StatelessWidget {
                 price,
                 style: const TextStyle(
                   fontSize: 36,
-                  fontWeight: FontWeight.black,
+                  fontWeight: FontWeight.w900,
                   fontFamily: 'Outfit',
                 ),
               ),
@@ -560,7 +560,7 @@ class PublicHomeScreen extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      _buildSocialIcon(Icons.share_arrival_rounded),
+                      _buildSocialIcon(Icons.share_rounded),
                       const SizedBox(width: 12),
                       _buildSocialIcon(Icons.rocket_launch_rounded),
                     ],

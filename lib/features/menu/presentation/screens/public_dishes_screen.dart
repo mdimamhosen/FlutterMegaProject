@@ -24,7 +24,7 @@ class _PublicDishesScreenState extends State<PublicDishesScreen> {
   }
 
   Future<void> _loadMenuData() async {
-    final list = await _db.getMenuItems();
+    final list = await _db.getAllMenuItems();
     if (mounted) {
       setState(() {
         _items = list;
@@ -83,7 +83,7 @@ class _PublicDishesScreenState extends State<PublicDishesScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: isMobile ? 32 : 48,
-                        fontWeight: FontWeight.black,
+                        fontWeight: FontWeight.w900,
                         fontFamily: 'Outfit',
                         color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
@@ -264,7 +264,7 @@ class _PublicDishesScreenState extends State<PublicDishesScreen> {
                       '\$${item['price'].toInt()}',
                       style: const TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.black,
+                        fontWeight: FontWeight.w900,
                         color: Color(0xFF10B981),
                         fontFamily: 'Outfit',
                       ),

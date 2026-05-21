@@ -102,7 +102,7 @@ class _ContactScreenState extends State<ContactScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: isMobile ? 32 : 48,
-                        fontWeight: FontWeight.black,
+                        fontWeight: FontWeight.w900,
                         fontFamily: 'Outfit',
                         color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),

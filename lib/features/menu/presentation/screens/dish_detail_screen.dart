@@ -23,7 +23,7 @@ class _DishDetailScreenState extends State<DishDetailScreen> {
   }
 
   Future<void> _loadItemDetails() async {
-    final list = await _db.getMenuItems();
+    final list = await _db.getAllMenuItems();
     final match = list.firstWhere(
       (itm) => itm['id'] == widget.dishId,
       orElse: () => {},
@@ -179,7 +179,7 @@ class _DishDetailScreenState extends State<DishDetailScreen> {
                 item['name'],
                 style: const TextStyle(
                   fontSize: 28,
-                  fontWeight: FontWeight.black,
+                  fontWeight: FontWeight.w900,
                   fontFamily: 'Outfit',
                 ),
               ),
@@ -189,7 +189,7 @@ class _DishDetailScreenState extends State<DishDetailScreen> {
               '\$${item['price'].toInt()}',
               style: const TextStyle(
                 fontSize: 28,
-                fontWeight: FontWeight.black,
+                fontWeight: FontWeight.w900,
                 color: Color(0xFF10B981),
                 fontFamily: 'Outfit',
               ),

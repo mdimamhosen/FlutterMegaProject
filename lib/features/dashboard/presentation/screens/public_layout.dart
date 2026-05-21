@@ -79,7 +79,7 @@ class _PublicLayoutState extends ConsumerState<PublicLayout> {
                       'MEGA',
                       style: TextStyle(
                         fontSize: 22,
-                        fontWeight: FontWeight.black,
+                        fontWeight: FontWeight.w900,
                         fontFamily: 'Outfit',
                         letterSpacing: 1.5,
                         color: isDark ? Colors.white : Colors.black87,
@@ -232,7 +232,7 @@ class _PublicLayoutState extends ConsumerState<PublicLayout> {
                     'MEGA',
                     style: TextStyle(
                       fontSize: 22,
-                      fontWeight: FontWeight.black,
+                      fontWeight: FontWeight.w900,
                       fontFamily: 'Outfit',
                       color: isDark ? Colors.white : Colors.black87,
                     ),

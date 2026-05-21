@@ -112,8 +112,6 @@ class _ReservationViewState extends State<ReservationView> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 800;
 
     return Scaffold(
       body: _isLoading
