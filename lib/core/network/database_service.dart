@@ -653,7 +653,7 @@ class DatabaseService {
         'name': name,
         'description': description,
         'price': price,
-        'image_url': imageUrl.isEmpty ? 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=300' : imageUrl,
+        'image_url': imageUrl.isEmpty ? 'premium_restaurant_interior.png' : imageUrl,
         'is_available': true,
         'addons': addons,
       });
@@ -667,7 +667,7 @@ class DatabaseService {
       'name': name,
       'description': description,
       'price': price,
-      'image_url': imageUrl.isEmpty ? 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=300' : imageUrl,
+      'image_url': imageUrl.isEmpty ? 'premium_restaurant_interior.png' : imageUrl,
       'is_available': true,
       'addons': addons,
     });
