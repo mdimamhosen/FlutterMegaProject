@@ -4,18 +4,36 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/order/presentation/screens/customer_menu_screen.dart';
+import '../../features/dashboard/presentation/screens/public_layout.dart';
+import '../../features/dashboard/presentation/screens/public_home_screen.dart';
+import '../../features/dashboard/presentation/screens/about_screen.dart';
+import '../../features/dashboard/presentation/screens/contact_screen.dart';
+import '../../features/dashboard/presentation/screens/faq_screen.dart';
+import '../../features/dashboard/presentation/screens/features_screen.dart';
+import '../../features/menu/presentation/screens/public_dishes_screen.dart';
+import '../../features/menu/presentation/screens/dish_detail_screen.dart';
 import '../network/database_service.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/',
   redirect: (BuildContext context, GoRouterState state) {
     final db = DatabaseService();
     final isLoggedIn = db.currentUser != null;
-    final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-    if (state.matchedLocation.startsWith('/menu/table/')) {
+    final isPublic = state.matchedLocation == '/' ||
+        state.matchedLocation == '/about' ||
+        state.matchedLocation == '/contact' ||
+        state.matchedLocation == '/faq' ||
+        state.matchedLocation == '/features' ||
+        state.matchedLocation == '/dishes' ||
+        state.matchedLocation.startsWith('/dishes/') ||
+        state.matchedLocation.startsWith('/menu/table/');
+
+    if (isPublic) {
       return null;
     }
+
+    final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
     if (!isLoggedIn && !isGoingToAuth) {
       return '/login';
@@ -26,6 +44,37 @@ final GoRouter appRouter = GoRouter(
     return null;
   },
   routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const PublicLayout(child: PublicHomeScreen()),
+    ),
+    GoRoute(
+      path: '/about',
+      builder: (context, state) => const PublicLayout(child: AboutScreen()),
+    ),
+    GoRoute(
+      path: '/contact',
+      builder: (context, state) => const PublicLayout(child: ContactScreen()),
+    ),
+    GoRoute(
+      path: '/faq',
+      builder: (context, state) => const PublicLayout(child: FaqScreen()),
+    ),
+    GoRoute(
+      path: '/features',
+      builder: (context, state) => const PublicLayout(child: FeaturesScreen()),
+    ),
+    GoRoute(
+      path: '/dishes',
+      builder: (context, state) => const PublicLayout(child: PublicDishesScreen()),
+    ),
+    GoRoute(
+      path: '/dishes/:dishId',
+      builder: (context, state) {
+        final dishId = state.pathParameters['dishId']!;
+        return PublicLayout(child: DishDetailScreen(dishId: dishId));
+      },
+    ),
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
