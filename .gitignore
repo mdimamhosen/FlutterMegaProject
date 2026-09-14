@@ -17,7 +17,6 @@ migrate_working_dir/
 .idea/
 
 # VS Code related
-.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -82,7 +81,6 @@ app.*.map.json
 *.jks
 *.keystore
 key.properties
-.env
 
 # Large Files
 *.mp4
@@ -92,3 +90,4 @@ key.properties
 
 node_modules/
 .cursor/
+config.bat
